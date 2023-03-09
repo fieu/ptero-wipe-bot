@@ -21,6 +21,7 @@ def send_prompt():
 
 
 def main(command):
+    log.info('STARTED')
     with open("config.json", "r") as f:
         config_json_str = f.read()
     config = Config.from_json(config_json_str)
