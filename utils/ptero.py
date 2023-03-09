@@ -1,4 +1,5 @@
 import fnmatch
+import time
 from typing import List
 
 import requests
@@ -16,6 +17,8 @@ def send_command(host: models.Host, server: models.Server, command: str) -> bool
         'Authorization': f'Bearer {host.api_token}',
     }
 
+    time.sleep(1)
+    log.debug(f'Sending command: "{command}" to server: "{server.name}" - ID: "{server.id}"')
     response = requests.post(
         f'{host.url}/api/client/servers/{server.id}/command',
         headers=headers,
@@ -41,6 +44,8 @@ def delete_files(host: models.Host, server: models.Server, file_list: List[str])
 
     for file in file_list:
         directory = f"{file.rsplit('/', 1)[0]}/"
+        time.sleep(1)
+        log.debug(f'Getting file list for directory: {directory} on server: "{server.name}" - ID: "{server.id}"')
         response = requests.get(
             f'{host.url}/api/client/servers/{server.id}/files/list?directory={directory}',
             headers=headers,
@@ -65,6 +70,8 @@ def delete_files(host: models.Host, server: models.Server, file_list: List[str])
         'files': matched_files,
     }
 
+    time.sleep(1)
+    log.debug(f'Deleting files: {matched_files} on server: "{server.name}" - ID: "{server.id}"')
     response = requests.post(
         f'{host.url}/api/client/servers/{server.id}/files/delete',
         headers=headers,
@@ -86,6 +93,8 @@ def stop_server(host: models.Host, server: models.Server) -> bool:
         'Content-Type': 'application/json',
         'Authorization': f'Bearer {host.api_token}',
     }
+    time.sleep(1)
+    log.debug(f'Stopping server: "{server.name}" - ID: "{server.id}"')
     response = requests.post(
         f'{host.url}/api/client/servers/{server.id}/power',
         headers=headers,
@@ -102,6 +111,8 @@ def start_server(host: models.Host, server: models.Server) -> bool:
         'Content-Type': 'application/json',
         'Authorization': f'Bearer {host.api_token}',
     }
+    time.sleep(1)
+    log.debug(f'Starting server: "{server.name}" - ID: "{server.id}"')
     response = requests.post(
         f'{host.url}/api/client/servers/{server.id}/power',
         headers=headers,
@@ -118,16 +129,19 @@ def change_seed(host: models.Host, server: models.Server, seed: str, size: str) 
         'Content-Type': 'application/json',
         'Authorization': f'Bearer {host.api_token}',
     }
-    log.debug(f'Changing seed to {seed} and world size to {size}.')
+    time.sleep(1)
+    log.debug(f'Changing seed to "{seed}" and world size to "{size}')
     response = requests.put(
         f'{host.url}/api/client/servers/{server.id}/startup/variable',
         headers=headers,
         json={'key': 'WORLD_SIZE', 'value': size},
     )
     if response.status_code != 200:
-        log.error(f'Failed to change world size to {size}')
+        log.error(f'Failed to change world size to "{size}"')
         return False
-    log.debug(f'Changed world size to {size}.')
+    log.debug(f'Changed world size to "{size}"')
+    time.sleep(1)
+    log.debug(f'Changing seed to "{seed}"')
     response = requests.put(
         f'{host.url}/api/client/servers/{server.id}/startup/variable',
         headers=headers,
@@ -135,9 +149,9 @@ def change_seed(host: models.Host, server: models.Server, seed: str, size: str) 
     )
 
     if response.status_code != 200:
-        log.error(f'Failed to change seed to {seed}.')
+        log.error(f'Failed to change seed to "{seed}"')
         return False
-    log.debug(f'Changed seed to {seed}.')
+    log.debug(f'Changed seed to "{seed}"')
     return True
 
 
@@ -147,6 +161,7 @@ def change_custom_map(host: models.Host, server: models.Server, custom_map: mode
         'Content-Type': 'application/json',
         'Authorization': f'Bearer {host.api_token}',
     }
+    time.sleep(1)
     log.debug(f'Changing map url to {custom_map.map_url}.')
     response = requests.put(
         f'{host.url}/api/client/servers/{server.id}/startup/variable',

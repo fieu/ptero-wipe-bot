@@ -45,6 +45,7 @@ class Server:
     discord: Discord
     pick_random_map: True
     seeds_file: str | None
+    rustmaps_seeds_filter: str | None
     custom_maps: List[CustomMap]
     files_to_delete: List[str]
 

@@ -27,8 +27,8 @@ def main(command):
     config = Config.from_json(config_json_str)
 
     # Verify each server exists on the host
-    log.info("Getting servers...")
     for host in config.hosts:
+        log.info(f'Getting servers from host "{host.name}"...')
         # Global Ptoerdactyl headers
         headers = {
             "Authorization": f"Bearer {host.api_token}",
@@ -158,25 +158,30 @@ def main(command):
                 )
 
             # Use procedural
-            if server.seeds_file:
-                if not custom_map:
+            if not custom_map:
+                seed = None
+                if server.rustmaps_seeds_filter:
+                    seed = utils.get_random_map_from_filter(config, server.rustmaps_seeds_filter)
+                    log.info(f"Using seed from RustMaps.com filter: {seed}")
+                if server.seeds_file:
                     seed = utils.pick_random_seed(server)
-                    if not ptero.change_seed(host, server, seed["seed"], seed["size"]):
-                        log.warning("Failed to change seed")
-                    log.info(
-                        f"Changed seed. Seed: {seed['seed']} - Size: {seed['size']}"
+                    log.info(f"Using seed from {server.seeds_file} file: {seed}")
+                if not ptero.change_seed(host, server, str(seed["seed"]), str(seed["size"])):
+                    log.warning("Failed to change seed")
+                log.info(
+                    f"Changed seed. Seed: {seed['seed']} - Size: {seed['size']}"
+                )
+                # Submit map generation request to RustMaps.com
+                generated_map_id = utils.generate_rustmaps_map(
+                    config, seed["seed"], seed["size"]
+                )
+                if not generated_map_id:
+                    log.warning(
+                        f'Failed to submit map generation request for seed {seed["seed"]} - size {seed["size"]}'
                     )
-                    # Submit map generation request to RustMaps.com
-                    generated_map_id = utils.generate_rustmaps_map(
-                        config, seed["seed"], seed["size"]
-                    )
-                    if not generated_map_id:
-                        log.warning(
-                            f'Failed to submit map generation request for seed {seed["seed"]} - size {seed["size"]}'
-                        )
-                    log.info(
-                        f'Submitted map generation request for seed {seed["seed"]} - size {seed["size"]}'
-                    )
+                log.info(
+                    f'Submitted map generation request for seed {seed["seed"]} - size {seed["size"]}'
+                )
 
             # change map really here
             log.info("Starting server")
