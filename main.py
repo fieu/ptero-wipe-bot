@@ -43,11 +43,11 @@ def main(command):
         for server in host.servers:
             if any(s["attributes"]["identifier"] == server.id for s in data["data"]):
                 log.info(
-                    f'Server "{server.id}" - "{server.name}" found on host "{host.name}"'
+                    f'ID "{server.id}" - "{server.name}" found on host "{host.name}"'
                 )
             else:
                 log.error(
-                    f'Server "{server.id}" - "{server.name}" not found on host "{host.name}". Check config.json file.'
+                    f'ID "{server.id}" - "{server.name}" not found on host "{host.name}". Check config.json file.'
                 )
                 exit(1)
 
@@ -89,7 +89,7 @@ def main(command):
                     if server:
                         break
                 if not server:
-                    log.error(f'Server "{server_id}" not found in config.json')
+                    log.error(f'Server ID "{server_id}" not found in config.json')
                     break
                 log.info(f'Found server "{server.name}" - ID: "{server.id}"')
                 first_thursday = False
