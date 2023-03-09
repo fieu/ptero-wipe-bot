@@ -94,7 +94,7 @@ def main(command):
                 log.info(f'Found server "{server.name}" - ID: "{server.id}"')
                 first_thursday = False
                 today = datetime.date.today()
-                if today.weekday() == 3 and today.day <= 7 and server.dont_wipe_on_force_wipe and "force" not in args:
+                if today.weekday() == 3 and today.day <= 7 and not server.wipe_on_force_wipe and "force" not in args:
                     first_thursday = True
                     log.error("Today is the first Thursday of the month. Cancelling wipe.")
                     log.error('Run with "force" at the end to force wipe')
