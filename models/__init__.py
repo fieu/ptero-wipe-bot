@@ -42,6 +42,7 @@ class Server:
     id: str
     name: str
     connect_address: str
+    dont_wipe_on_force_wipe: bool
     discord: Discord
     pick_random_map: True
     seeds_file: str | None

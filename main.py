@@ -1,3 +1,4 @@
+import datetime
 import random
 import threading
 import time
@@ -21,7 +22,6 @@ def send_prompt():
 
 
 def main(command):
-    log.info('STARTED')
     with open("config.json", "r") as f:
         config_json_str = f.read()
     config = Config.from_json(config_json_str)
@@ -52,12 +52,12 @@ def main(command):
                 exit(1)
 
     log.info("Commands:")
-    log.info("wipe <server id> - Wipes server")
+    log.info("wipe <server id> [force] - Wipes server")
 
     for host in config.hosts:
         if " " not in command and command != "quit":
             if command != "":
-                log.error("Usage: wipe <server id>")
+                log.error("Usage: wipe <server id> [force]")
             break
 
         server = None
@@ -68,7 +68,7 @@ def main(command):
         # if argument is empty, remove it
         args = [arg for arg in args if arg != ""]
         if len(args) < 1:
-            log.error("Usage: wipe <server id>")
+            log.error("Usage: wipe <server id> [force]")
         log.info(f"Command arguments: {args}")
         if args[0]:
             if args[0] == "quit":
@@ -77,7 +77,7 @@ def main(command):
             if args[0] == "wipe":
                 if len(args) <= 1:
                     if command == "":
-                        log.error("Usage: wipe <server id>")
+                        log.error("Usage: wipe <server id> [force]")
                     break
                 server_id = args[1]
                 # find server in any host that corresponds to server_id
@@ -92,7 +92,13 @@ def main(command):
                     log.error(f'Server "{server_id}" not found in config.json')
                     break
                 log.info(f'Found server "{server.name}" - ID: "{server.id}"')
-
+                first_thursday = False
+                today = datetime.date.today()
+                if today.weekday() == 3 and today.day <= 7 and server.dont_wipe_on_force_wipe and "force" not in args:
+                    first_thursday = True
+                    log.error("Today is the first Thursday of the month. Cancelling wipe.")
+                    log.error('Run with "force" at the end to force wipe')
+                    break
             # Global Ptoerdactyl headers
             # "host" must be equal to a host which holds the correct "server_id"
             for h in config.hosts:
@@ -313,6 +319,7 @@ def main(command):
 
 
 if __name__ == "__main__":
+    log.info('STARTED')
     try:
         command = ""
         count = 0
