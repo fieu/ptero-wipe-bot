@@ -94,9 +94,16 @@ def main(command):
                 log.info(f'Found server "{server.name}" - ID: "{server.id}"')
                 first_thursday = False
                 today = datetime.date.today()
-                if today.weekday() == 3 and today.day <= 7 and not server.wipe_on_force_wipe and "force" not in args:
+                if (
+                    today.weekday() == 3
+                    and today.day <= 7
+                    and not server.wipe_on_force_wipe
+                    and "force" not in args
+                ):
                     first_thursday = True
-                    log.error("Today is the first Thursday of the month. Cancelling wipe.")
+                    log.error(
+                        "Today is the first Thursday of the month. Cancelling wipe."
+                    )
                     log.error('Run with "force" at the end to force wipe')
                     break
             # Global Ptoerdactyl headers
@@ -167,16 +174,18 @@ def main(command):
             if not custom_map:
                 seed = None
                 if server.rustmaps_seeds_filter:
-                    seed = utils.get_random_map_from_filter(config, server.rustmaps_seeds_filter)
+                    seed = utils.get_random_map_from_filter(
+                        config, server.rustmaps_seeds_filter
+                    )
                     log.info(f"Using seed from RustMaps.com filter: {seed}")
                 if server.seeds_file:
                     seed = utils.pick_random_seed(server)
                     log.info(f"Using seed from {server.seeds_file} file: {seed}")
-                if not ptero.change_seed(host, server, str(seed["seed"]), str(seed["size"])):
+                if not ptero.change_seed(
+                    host, server, str(seed["seed"]), str(seed["size"])
+                ):
                     log.warning("Failed to change seed")
-                log.info(
-                    f"Changed seed. Seed: {seed['seed']} - Size: {seed['size']}"
-                )
+                log.info(f"Changed seed. Seed: {seed['seed']} - Size: {seed['size']}")
                 # Submit map generation request to RustMaps.com
                 generated_map_id = utils.generate_rustmaps_map(
                     config, seed["seed"], seed["size"]
@@ -319,7 +328,7 @@ def main(command):
 
 
 if __name__ == "__main__":
-    log.info('STARTED')
+    log.info("STARTED")
     try:
         command = ""
         count = 0
