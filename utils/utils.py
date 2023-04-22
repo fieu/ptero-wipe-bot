@@ -29,8 +29,8 @@ def generate_rustmaps_map(config: models.Config, seed: str, size: str) -> str | 
     params = {
         'size': size,
         'seed': seed,
-        'staging': 'false',
-        'barren': 'false',
+        'staging': False,
+        'barren': False,
     }
 
     time.sleep(1)
