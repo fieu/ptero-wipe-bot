@@ -23,24 +23,28 @@ def generate_rustmaps_map(config: models.Config, seed: str, size: str) -> str | 
     headers = {
         'accept': 'application/json',
         'X-API-Key': config.rustmaps_api_token,
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Type': 'application/json',
     }
 
     params = {
+        'size': size,
+        'seed': seed,
         'staging': 'false',
         'barren': 'false',
     }
 
     time.sleep(1)
     log.debug(f'Submitting map generation request for seed: {seed} - size: {size}')
-    response = requests.post(f'https://rustmaps.com/api/v2/maps/{seed}/{size}', params=params, headers=headers)
+    response = requests.post(f'https://api.rustmaps.com/v4/maps', params=params, headers=headers)
     log.debug(response)
+    log.debug(response.content)
 
     if response.status_code != 200 and response.status_code != 204 and response.status_code != 409:
         log.debug(response)
-        log.debug(response.json())
+        log.debug(response.content)
+        # log.debug(response.json())
         return None
-    data = response.json()
+    data = response.json()['data']
     return data['mapId']
 
 
@@ -52,11 +56,11 @@ def get_generated_map_url(config: models.Config, map_id: str):
 
     time.sleep(1)
     log.debug(f'Getting map url for map id: "{map_id}"')
-    response = requests.get(f'https://rustmaps.com/api/v2/maps/{map_id}', headers=headers)
+    response = requests.get(f'https://api.rustmaps.com/v4/maps/{map_id}', headers=headers)
     log.debug(response)
 
     # check if the key "imageIconUrl" doesn't exist in the response JSON
-    data = response.json()
+    data = response.json()['data']
     if "imageIconUrl" not in data:
         return None
     return data['imageIconUrl']
@@ -91,7 +95,7 @@ def get_random_map_from_filter(config: models.Config, rustmaps_filter: str) -> S
 
     time.sleep(1)
     log.debug(f'Getting random RustMaps map from filter: "{rustmaps_filter}"')
-    response = requests.get(f'https://rustmaps.com/api/v2/maps/filter/{rustmaps_filter}', params=params,
+    response = requests.get(f'https://api.rustmaps.com/v4/maps/filter/{rustmaps_filter}', params=params,
                             headers=headers)
 
     data = response.json()
