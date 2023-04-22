@@ -4,6 +4,7 @@ import time
 from typing import TypedDict
 
 import requests
+from rich import inspect
 
 import models
 from setup_logger import log
@@ -26,7 +27,7 @@ def generate_rustmaps_map(config: models.Config, seed: str, size: str) -> str | 
         'Content-Type': 'application/json',
     }
 
-    params = {
+    json_params = {
         'size': size,
         'seed': seed,
         'staging': False,
@@ -35,17 +36,28 @@ def generate_rustmaps_map(config: models.Config, seed: str, size: str) -> str | 
 
     time.sleep(1)
     log.debug(f'Submitting map generation request for seed: {seed} - size: {size}')
-    response = requests.post(f'https://api.rustmaps.com/v4/maps', params=params, headers=headers)
+    response = requests.post(f'https://api.rustmaps.com/v4/maps', json=json_params, headers=headers)
     log.debug(response)
-    log.debug(response.content)
 
-    if response.status_code != 200 and response.status_code != 204 and response.status_code != 409:
+    if response.status_code != 200 and response.status_code != 201 and response.status_code != 204 and response.status_code != 409 and response.status_code != 404:
         log.debug(response)
-        log.debug(response.content)
         # log.debug(response.json())
         return None
-    data = response.json()['data']
-    return data['mapId']
+    data = response.json()
+    if "id" not in data or not data['data']:
+        params = {
+            'barren': False,
+            'staging': False,
+        }
+
+        response = requests.get(f'https://api.rustmaps.com/v4/maps/{size}/{seed}', json=params, headers=headers)
+        if response.ok or response.status_code == 400:
+            data = response.json()
+            log.debug(response)
+            if "data" in data:
+                if "id" in data:
+                    return data['data']['id']
+    return data['data']['id']
 
 
 def get_generated_map_url(config: models.Config, map_id: str):
@@ -60,6 +72,7 @@ def get_generated_map_url(config: models.Config, map_id: str):
     log.debug(response)
 
     # check if the key "imageIconUrl" doesn't exist in the response JSON
+    log.debug(response)
     data = response.json()['data']
     if "imageIconUrl" not in data:
         return None
@@ -100,11 +113,11 @@ def get_random_map_from_filter(config: models.Config, rustmaps_filter: str) -> S
 
     data = response.json()
 
-    if "results" not in data:
+    if "data" not in data:
         log.debug(f'Failed to get random RustMaps map from filter: "{rustmaps_filter}" - falling back to random seed')
         return fallback_seed
 
-    seeds = data['results']
+    seeds = data['data']
 
     if len(seeds) <= 0:
         log.debug(f'No seeds found for filter: "{rustmaps_filter}" - falling back to random seed')

@@ -116,7 +116,7 @@ def main(command):
             )
             log.info(f"Saving server")
             if not ptero.send_command(host, server, "save"):
-                log.warning(f'Failed to send "save" comment to server')
+                log.warning(f'Failed to send "save" command to server')
             time.sleep(2)
             log.info(f"Stopping server")
             if not ptero.stop_server(host, server):
